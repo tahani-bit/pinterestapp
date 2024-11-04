@@ -5,12 +5,7 @@ import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 
 export const FinalBoardSteps = [
-  {
-    title: 'Welcome :)',
-    content: 'Hi there 👋. Welcome to my website 😊. Let these small pop-ups guide you through the navigation 🗺️, so you can enjoy the full experience 📌. Lets get started!',
-    target: '#root',
-    placement: 'center',
-  },
+ 
   {
     title: 'Pin board',
     content:

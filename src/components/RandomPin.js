@@ -11,7 +11,7 @@ export default async function RandomPin(event) {
     board: 'default',
     title: 'Random Pin',
     description: loremIpsum,
-    destination: 'http://metaphorpsum.com/',
+    destination: 'https://www.pinterest.com/pin/598556606759283998/',
     pin_size: sizes[Math.floor(Math.random() * sizes.length)],
     tags: ['Random', 'Generated', 'Pin', 'Example'],
   };

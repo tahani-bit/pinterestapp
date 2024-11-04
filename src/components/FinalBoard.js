@@ -1,3 +1,4 @@
+// Import necessary React and component modules
 import React from 'react';
 import RandomPin from './RandomPin.js';
 import Pin from './Pin.js';
@@ -10,37 +11,43 @@ import ReactJoyride from 'react-joyride';
 import { deletePinBackend, fetchPinsBackend } from '../firebase_setup/DatabaseOperations.js';
 import { Tooltip } from 'antd';
 
-import '../styles/final_board_styles.css';
+import '../styles/final_board_styles.css'; // Import custom styles
 
-import autoAnimate from '@formkit/auto-animate';
+import autoAnimate from '@formkit/auto-animate'; // Library for automatic animations
 
+// Main FinalBoard class component to display and manage pins
 class FinalBoard extends React.Component {
   constructor(props) {
     super(props);
-    this.animate = React.createRef();
+    this.animate = React.createRef(); // Reference for animated elements
 
+    // Initialize component state
     this.state = {
-      pinsFromDb: [],
-      pinsToShow: [],
-      show_modal: false,
-      show_open_pin: false,
-      show_guidelines: false,
-      show_loading: false,
+      pinsFromDb: [], // Holds pins fetched from Firestore
+      pinsToShow: [], // Holds pins to display in the UI
+      show_modal: false, // Controls add-pin modal visibility
+      show_open_pin: false, // Controls open-pin modal visibility
+      show_guidelines: false, // Controls guidelines modal visibility
+      show_loading: false, // Controls loading icon visibility
     };
   }
 
+  // Fetch pins on component mount and initialize animations
   componentDidMount() {
-    this.fetchPins();
-    this.animate.current && autoAnimate(this.animate.current);
+    this.fetchPins(); // Fetch pins from Firestore
+    this.animate.current && autoAnimate(this.animate.current); // Enable animations if element is available
   }
 
+  // Async function to fetch pins from backend
   fetchPins = async () => {
-    let pinsArray = [];
-    let fetchedPins = await fetchPinsBackend().catch((error) => console.error(error));
+    let pinsArray = []; // Temporary array for holding pins
+    let fetchedPins = await fetchPinsBackend().catch((error) => console.error(error)); // Fetch pins and catch errors
     fetchedPins.forEach((p) => {
+      // Map each fetched pin to a Pin component
       pinsArray.push(<Pin pinDetails={p} key={p.id} openPin={this.openPin} deletePin={this.deletePin} />);
     });
     this.setState((_state) => {
+      // Update state with fetched pins
       return {
         ..._state,
         pinsFromDb: pinsArray,
@@ -49,40 +56,49 @@ class FinalBoard extends React.Component {
     });
   };
 
+  // Refresh pin list and close modals if open
   refreshPins = async () => {
-    this.setState({ show_modal: false });
-    await this.fetchPins();
+    this.setState({ show_modal: false }); // Hide add-pin modal
+    await this.fetchPins(); // Fetch updated pin list
   };
 
+  // Open pin details modal
   openPin = (pinDetails) => {
-    this.pinDetails = pinDetails;
-    this.setState({ show_open_pin: true });
+    this.pinDetails = pinDetails; // Store pin details for display
+    this.setState({ show_open_pin: true }); // Show open-pin modal
   };
 
+  // Delete a pin and refresh pins list
   deletePin = async (pinDetails) => {
-    //todo: add loading mode and/or transition state (blur the pin, fade it out etc)
-    await deletePinBackend(pinDetails);
-    await this.fetchPins();
-    this.setState({ show_open_pin: false });
+    //todo: Add loading indicator or transition effect (e.g., blur/fade)
+    await deletePinBackend(pinDetails); // Delete pin from backend
+    await this.fetchPins(); // Refresh pin list after deletion
+    this.setState({ show_open_pin: false }); // Hide open-pin modal
   };
 
+  // Generate and display a random pin
   generateRandomPin = async (event) => {
-    this.setState({ show_loading: true });
-    await RandomPin(event);
-    await this.fetchPins();
-    this.setState({ show_loading: false });
+    this.setState({ show_loading: true }); // Show loading icon
+    await RandomPin(event); // Generate random pin
+    await this.fetchPins(); // Fetch updated pin list
+    this.setState({ show_loading: false }); // Hide loading icon
   };
 
+  // Filter pins based on search or criteria
   filterPins = (filteredPins) => {
-    this.setState({ pinsToShow: filteredPins });
+    this.setState({ pinsToShow: filteredPins }); // Update displayed pins
   };
 
+  // Render method to display component UI
   render() {
     return (
       <div style={{ overflow: 'hidden' }} ref={this.windowRef}>
+        {/* Header component with search/filter functionality */}
         <div class='header_container' id='header_bar'>
           <Header pinsToFilter={this.state.pinsFromDb} filterPins={this.filterPins} />
         </div>
+
+        {/* Navigation bar with tooltips and icon buttons */}
         <div className='navigation_bar' id='navigation_bar'>
           <Tooltip title='Add new Pin'>
             <div onClick={() => this.setState({ show_modal: true })} className='pint_mock_icon_container' id='add_pin'>
@@ -105,19 +121,31 @@ class FinalBoard extends React.Component {
             </div>
           </Tooltip>
         </div>
+
+        {/* Container for displaying pins with animations */}
         <div className='pin_container' ref={this.animate} id='pin_container'>
-          {this.state.pinsToShow}
+          {this.state.pinsToShow} {/* Display pins */}
         </div>
+
+        {/* Add-pin modal container */}
         <div onClick={(event) => (event.target.className === 'add_pin_modal' ? this.setState({ show_modal: false }) : null)} className='add_pin_modal_container'>
           {this.state.show_modal ? <Modal refreshPins={this.refreshPins} /> : null}
         </div>
+
+        {/* Open-pin modal container */}
         <div onClick={(event) => (event.target.className === 'open_pin_modal' ? this.setState({ show_open_pin: false }) : null)} className='open_pin_modal_container'>
           {this.state.show_open_pin ? <OpenPin pinDetails={this.pinDetails} deletePin={this.deletePin} /> : null}
         </div>
+
+        {/* Guidelines modal container */}
         <div onClick={(event) => (event.target.className === 'guidelines_modal' ? this.setState({ show_guidelines: false }) : null)} className='guidelines_modal_container'>
           {this.state.show_guidelines ? <Guidelines /> : null}
         </div>
+
+        {/* Loading icon display */}
         {this.state.show_loading ? <LoadingIcon /> : null}
+
+        {/* User tour guide for app features using ReactJoyride */}
         <ReactJoyride
           continuous
           hideCloseButton
@@ -125,12 +153,12 @@ class FinalBoard extends React.Component {
           disableScrolling={true}
           showProgress
           showSkipButton
-          steps={FinalBoardSteps}
+          steps={FinalBoardSteps} // Steps for Joyride guide
           styles={{
             options: {
               primaryColor: '#ff0400',
               textColor: '#004a14',
-              zIndex: 1000,
+              zIndex: 1000, // Ensures guide is above all elements
             },
           }}
         />
@@ -139,4 +167,4 @@ class FinalBoard extends React.Component {
   }
 }
 
-export default FinalBoard;
+export default FinalBoard; // Export component for use in other files
